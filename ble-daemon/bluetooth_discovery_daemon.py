@@ -1,6 +1,6 @@
-from lib.mqtt import MQTTClient
-from lib.bluetooth import BLEScanner
-from lib.json_helper import bytes_to_strings
+from daemon.mqtt import MQTTClient
+from daemon.bluetooth import BLEScanner
+from daemon.json_helper import bytes_to_strings
 import asyncio
 from dotenv import load_dotenv
 import os
@@ -9,7 +9,7 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 import json
 from termcolor import colored
-from lib.json_helper import bytes_to_strings
+from daemon.json_helper import bytes_to_strings
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
