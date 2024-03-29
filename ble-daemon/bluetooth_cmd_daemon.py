@@ -1,5 +1,5 @@
-from mqtt import MQTTClient
-from bluetooth import BLEConn, BLEScanner, BLEDevice
+from lib.mqtt import MQTTClient
+from lib.bluetooth import BLEConn, BLEScanner, BLEDevice
 import asyncio
 from dotenv import load_dotenv
 import os
