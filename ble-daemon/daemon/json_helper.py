@@ -1,6 +1,6 @@
 from binascii import hexlify
 
-def bytes_to_strings(d):
+def bytes_to_strings(d: bytes):
     if isinstance(d, bytes):
         return hexlify(d).decode('ascii')  # Decode bytes to string
     elif isinstance(d, dict):

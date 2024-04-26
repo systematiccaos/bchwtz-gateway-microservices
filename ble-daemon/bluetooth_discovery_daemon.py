@@ -42,9 +42,13 @@ class BluetoothDiscoveryDaemon(object):
     def on_ble_message(self, dev: BLEDevice, properties: AdvertisementData):
         print(dev)
         print(properties)
-        if self.check_if_valid_device(dev, int(os.environ.get("BLE_MANUFACTURER_ID", 0))):
+        manufacturer_id = int(os.environ.get("BLE_MANUFACTURER_ID", 0))
+        if self.check_if_valid_device(dev, manufacturer_id=manufacturer_id):
             # return
-            self.mqtt_client.send_message("advertisements", msg = json.dumps({"device": dev.address, "advertisement_data": str(properties), "metadata": bytes_to_strings(dev.metadata)}))
+            self.mqtt_client.send_message(f"{dev.address}/advertisements", msg = json.dumps({"device": dev.address, "advertisement_data": str(properties), "metadata": bytes_to_strings(dev.metadata)}))
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/name", msg = properties.local_name)
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/rssi", msg = properties.rssi)
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/manufacturer_data", msg = bytes_to_strings(properties.manufacturer_data[manufacturer_id]))
 
     def on_mqtt_message(self, topic: str, payload: any):
         pass
