@@ -18,7 +18,7 @@ logger = logging.getLogger("bluetooth")
 class BluetoothDiscoveryDaemon(object):
 
     def __init__(self):
-        self.mqtt_client = MQTTClient(self.on_mqtt_message)
+        self.mqtt_client = MQTTClient(self.on_mqtt_message, name="discovery_daemon")
         self.scanner = BLEScanner()
 
     async def scan(self):
