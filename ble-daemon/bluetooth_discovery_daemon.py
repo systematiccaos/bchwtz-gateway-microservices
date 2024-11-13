@@ -1,6 +1,6 @@
-from daemon.mqtt import MQTTClient
-from daemon.bluetooth import BLEScanner
-from daemon.json_helper import bytes_to_strings
+from gateway.mqtt import MQTTClient
+from gateway.bluetooth import BLEScanner
+from gateway.json_helper import bytes_to_strings
 import asyncio
 from dotenv import load_dotenv
 import os

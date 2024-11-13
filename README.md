@@ -4,6 +4,13 @@ Quickstart:
 cd ble_daemon && cp .env-default .env
 ```
 ```bash
+source setpath.sh
+```
+if you are using fish:
+```bash
+source setpath.fish
+```
+```bash
 cd deployments && cp .env-default .env && docker-compose --env-file .env up -d
 ```
 ````bash

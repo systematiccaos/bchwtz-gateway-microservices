@@ -1,0 +1,10 @@
+asyncio
+paho-mqtt
+python-dotenv
+termcolor
+attr
+attrs
+crcmod
+nbformat
+ruuvitag_sensor
+bleak

@@ -1,10 +1,10 @@
-from daemon.mqtt import MQTTClient
-from daemon.bluetooth import BLEConn, BLEScanner, BLEDevice
+from gateway.mqtt import MQTTClient
+from gateway.bluetooth import BLEConn, BLEScanner, BLEDevice
 import asyncio
 from dotenv import load_dotenv
 import os
 import logging
-from daemon.json_helper import bytes_to_strings
+from gateway.json_helper import bytes_to_strings
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("bluetooth")
