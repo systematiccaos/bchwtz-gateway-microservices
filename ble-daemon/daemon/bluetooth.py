@@ -10,7 +10,7 @@ class BLEConn():
     def __init__(self, address) -> None:
         """ creates a new instance of BLEConn.
         """
-        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
         self.logger: logging.Logger = logging.getLogger("BLEConn")
         self.logger.setLevel(logging.INFO)
         self.stopEvent: asyncio.Event = asyncio.Event()
@@ -18,10 +18,6 @@ class BLEConn():
         self.client: BleakClient = None
         self.device: BLEDevice = None
         self.address: str = address
-
-    async def connect(self):
-        print("connecting to")
-        self.client = await self._get_client(self.address)
 
     async def _get_client(self, dev: str, timeout: float = 30.0) -> BleakClient:
         if self.client is None or not self.client.is_connected:
@@ -56,11 +52,13 @@ class BLEConn():
         device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=5.0)
         cmd = cmd.decode('ascii')
         self.logger.info(device.details)
-        async with BleakClient(device) as client:
+        async with self.connect(device) as client:
             # if not device.details["props"]["Paired"]:
             #     await client.pair()
             self.logger.info("connected to %s", self.address)
             self.logger.info("sending command %s", cmd)
+            self.logger.info("raw %s", bytearray.fromhex(cmd))
+            
             try:
                 if cb is not None:
                     await client.start_notify(char_specifier = read_chan, callback = cb)
@@ -68,7 +66,7 @@ class BLEConn():
                 if await_response:
                     self.logger.info("disconnecting...")
                 else:
-                    self.logger.info("waiting...")
+                    self.logger.info("waiting for data...")
                     await self.stopEvent.wait()
                 self.logger.info("ending...")
                 self.stopEvent.clear()
@@ -78,12 +76,21 @@ class BLEConn():
                     self.logger.warn(f"{e} - retrying...")
                     await self.run_single_ble_command(self.device, read_chan, write_chan, cmd, timeout, cb, retries+1, max_retries)
                 return
+            
+    def connect(self, device: BLEDevice) -> BleakClient:
+        if self.client is None or not self.client.is_connected:
+            self.client = BleakClient(device)
+        return self.client
 
-    async def listen_for_data_stream(self, tag: BLEDevice, read_chan: str, timeout: float = 20.0, cb: Callable[[int, bytearray], None]=None):
-            client = await self._get_client(tag)
-            await client.start_notify(char_specifier = read_chan, callback = cb)
-            asyncio.sleep(timeout)
-            await client.stop_notify(char_specifier=read_chan)
+    async def listen_for_data_stream(self, read_chan: str, timeout: float = 20.0, cb: Callable[[int, bytearray], None]=None):
+        device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=5.0)
+        client = self.connect(device)
+        await client.start_notify(char_specifier = read_chan, callback = cb)
+        self.logger.info("started listening for stream data...")
+        await self.stopEvent.wait()
+        self.logger.info("stopped listening for stream data")
+        await self.stopEvent.clear()
+        await client.stop_notify(char_specifier=read_chan)
 
 class BLEScanner():
     async def listen_advertisements(timeout: float = 5.0, cb: Callable[[BLEDevice, dict], None] = None) -> None:

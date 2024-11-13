@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   mqtt-broker:
-    image: rabbitmq:3.9-alpine
+    image: rabbitmq:alpine
     security_opt:
       - seccomp:unconfined
     command: "/bin/bash -c \"rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-server\""

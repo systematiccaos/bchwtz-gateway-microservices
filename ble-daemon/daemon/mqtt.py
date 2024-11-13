@@ -27,7 +27,7 @@ class MQTTClient():
         )
         self.client.connect(
             host = os.environ.get("MQTT_HOST", "localhost"),
-            port = os.environ.get("MQTT_PORT", 1883),
+            port = int(os.environ.get("MQTT_PORT", 1883)),
         )
         if asnc:
             self.client.loop_start()

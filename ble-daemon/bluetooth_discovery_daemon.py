@@ -9,7 +9,6 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 import json
 from termcolor import colored
-from daemon.json_helper import bytes_to_strings
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
