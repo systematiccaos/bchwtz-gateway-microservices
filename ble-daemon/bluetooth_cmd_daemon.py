@@ -1,5 +1,5 @@
 from gateway.mqtt import MQTTClient
-from gateway.bluetooth import BLEConn, BLEScanner, BLEDevice
+from bluetooth import BLEConn
 import asyncio
 from dotenv import load_dotenv
 import os

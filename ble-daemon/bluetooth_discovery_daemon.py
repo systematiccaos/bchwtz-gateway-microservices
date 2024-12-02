@@ -1,5 +1,5 @@
 from gateway.mqtt import MQTTClient
-from gateway.bluetooth import BLEScanner
+from bluetooth import BLEScanner
 from gateway.json_helper import bytes_to_strings
 import asyncio
 from dotenv import load_dotenv

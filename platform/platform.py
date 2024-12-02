@@ -1,23 +1,25 @@
 from gateway.mqtt import MQTTClient
 import asyncio
 from dotenv import load_dotenv
-import os
 import logging
-from gateway.json_helper import bytes_to_strings
-from utils.decoding import Decoder
 import json
+from transcoder import Decoder
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
-logger = logging.getLogger("transcoder")
+logger = logging.getLogger("platform")
 main_loop = asyncio.new_event_loop()
 ble_loop = asyncio.new_event_loop()
 bg_loop = asyncio.new_event_loop()
 decoder = Decoder()
-class Transcoder(object):
+
+class Platform(object):
 
     def __init__(self):
-        self.mqtt_client = MQTTClient(self.on_mqtt_message, name="transcoding_daemon")
+        self.mqtt_client = MQTTClient(self.on_mqtt_message, name="platform_daemon")
         self.address = ""
+
+    def wakeup(self):
+        pass
 
     def on_mqtt_message(self, topic: str, payload: any):
         topic_attrs = topic.split("/")
@@ -40,7 +42,7 @@ class Transcoder(object):
             if key == "manufacturer_data":
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
-                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded_advertisements", json.dumps(decoded_data))
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/{topic_attrs[1]}/decoded_advertisements", json.dumps(decoded_data))
                 logger.info("decoding")
                 
             elif key == "encode":
@@ -55,5 +57,5 @@ class Transcoder(object):
             return
 
 load_dotenv()
-daemon = Transcoder()
+daemon = Platform()
 main_loop.run_forever()

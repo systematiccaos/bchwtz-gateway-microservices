@@ -62,3 +62,4 @@ class AccelerationSensor(Sensor):
             props: dict = self.__dict__
             props["measurements"] = ""
             return props
+        
