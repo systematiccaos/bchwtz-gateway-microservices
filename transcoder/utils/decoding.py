@@ -518,7 +518,7 @@ class Decoder():
         advert = {}
         inp = binascii.unhexlify(inp)
         inp = list(inp)
-        advert["format"] = inp[0:1]
+        advert["format"] = int.from_bytes(inp[0:1])
         advert["temperature"] = int.from_bytes(inp[1:3]) * .005
         advert["humidity"] = int.from_bytes(inp[3:5]) * .0025
         advert["pressure"] = (int.from_bytes(inp[5:7]) + 50000) / 100
