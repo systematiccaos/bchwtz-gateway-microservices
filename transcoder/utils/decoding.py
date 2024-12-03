@@ -522,9 +522,9 @@ class Decoder():
         advert["temperature"] = int.from_bytes(inp[1:3]) * .005
         advert["humidity"] = int.from_bytes(inp[3:5]) * .0025
         advert["pressure"] = (int.from_bytes(inp[5:7]) + 50000) / 100
-        advert["acceleration_x"] = int.from_bytes(inp[7:9])
-        advert["acceleration_y"] = int.from_bytes(inp[9:11])
-        advert["acceleration_z"] = int.from_bytes(inp[11:13])
+        advert["acceleration_x"] = int.from_bytes(inp[7:9], signed=True)
+        advert["acceleration_y"] = int.from_bytes(inp[9:11], signed=True)
+        advert["acceleration_z"] = int.from_bytes(inp[11:13], signed=True)
         advert["power_and_rec"] = inp[13:15]
         advert["movements"] = inp[15]
         advert["sequence"] = inp[16:18]
