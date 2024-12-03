@@ -1,5 +1,6 @@
 from ast import Bytes
 from binascii import hexlify # built-in
+import binascii
 import logging
 import time
 from ruuvitag_sensor.decoder import Df3Decoder, get_decoder
@@ -513,9 +514,25 @@ class Decoder():
         received_time = time.mktime(time.localtime(int(hexlify(bytearr[:-9:-1]), 16) / 1000))
         return received_time
 
-    def decode_advertisement(self, advertisement_data: AdvertisementData) -> dict:
-        data = advertisement_data.hex()
-        return get_decoder(advertisement_data).decode_data(data)
+    def decode_ad5(self, inp: bytearray) -> dict:
+        advert = {}
+        inp = binascii.unhexlify(inp)
+        inp = list(inp)
+        advert["format"] = inp[0:1]
+        advert["temperature"] = int.from_bytes(inp[1:3]) * .005
+        advert["humidity"] = int.from_bytes(inp[3:5]) * .0025
+        advert["pressure"] = (int.from_bytes(inp[5:7]) + 50000) / 100
+        advert["acceleration_x"] = int.from_bytes(inp[7:9])
+        advert["acceleration_y"] = int.from_bytes(inp[9:11])
+        advert["acceleration_z"] = int.from_bytes(inp[11:13])
+        advert["power_and_rec"] = inp[13:15]
+        advert["movements"] = inp[15]
+        advert["sequence"] = inp[16:18]
+        return advert
+
+    def decode_advertisement(self, advertisement_data: bytes) -> dict:
+        # data = advertisement_data.hex()
+        return self.decode_ad5(advertisement_data)
 
     def decode_heartbeat_rx(self, bytearr: Bytes = None) -> int:
         heartbeat = int.from_bytes(bytearr[4:6], byteorder='big', signed=False)
