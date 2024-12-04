@@ -51,7 +51,7 @@ class BLEConn():
         self.logger.info("connecting to %s", self.address)
         device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=5.0)
         cmd = cmd.decode('ascii')
-        self.logger.info(device.details)
+        # self.logger.info(device.details)
         async with self.connect(device) as client:
             # if not device.details["props"]["Paired"]:
             #     await client.pair()

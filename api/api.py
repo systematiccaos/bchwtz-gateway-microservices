@@ -5,6 +5,7 @@ from mergedeep import merge
 from transcoder.utils.encoding import Encoder
 import time
 import json
+import os
 
 app = Flask(__name__)
 state = {}
@@ -56,4 +57,4 @@ def get_heartbeat(address, heartbeat):
 #     return jsonify(new_item), 201
 
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    app.run(port=os.environ['API_PORT'], debug=True)

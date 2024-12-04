@@ -3,6 +3,7 @@ from bluetooth import BLEConn
 import asyncio
 from dotenv import load_dotenv
 import os
+import uuid
 import logging
 from gateway.json_helper import bytes_to_strings
 
@@ -17,12 +18,13 @@ class BluetoothCMDDaemon(object):
         self.mqtt_client = MQTTClient(self.on_mqtt_message, name="cmd_daemon")
         self.address = ""
         self.mqtt_client.send_message(f"log", msg = "online")
+        self.uuid = str(uuid.uuid4())
 
 
     def on_ble_response(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
-        self.mqtt_client.send_message(f"{self.address}/response", msg = str(res))
+        self.mqtt_client.send_message(f"{self.address}/response/{self.uuid}", msg = str(res))
 
     def on_stream_data(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
@@ -64,6 +66,7 @@ class BluetoothCMDDaemon(object):
         except Exception as e:
             logger.error(f"recovered from ble error - check your command")
             logger.exception(e)
+            self.mqtt_client.send_message("%s/response/error/%s" % (address, self.uuid), "error")
             return
 
 load_dotenv()
