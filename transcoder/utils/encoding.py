@@ -35,6 +35,7 @@ class Encoder():
 
     def encode_time(self, time: float = None) -> str:
         now = struct.pack("<Q", int(time * 1000)).hex()
+        print(now)
         command = Config.Commands.set_tag_time_substr.value + now
         self.logger.debug("Set sensor time {}".format(command))
         return command

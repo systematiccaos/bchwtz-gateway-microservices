@@ -47,17 +47,18 @@ class BluetoothCMDDaemon(object):
             logger.error("recovered from error - no command provided on mqtt")
             return
         ble_client = BLEConn(address=address)
-        print(payload)
+        logger.debug(payload)
         try:
             if fn == "run_single_ble_command":
                 logger.info("running command")
+                print(payload)
                 ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_ble_response, await_response=True))
             elif fn == "start_stream":
                 ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_stream_data, await_response=False))
             elif fn == "stop_stream":
                 bg_loop.run_until_complete(ble_client.stopEvent.set())
             else:
-                logger.error(f"function not available for {fn}")
+                logger.debug(f"function not available for {fn}")
             # ble_loop.run_until_complete()
             # self.loop.run_until_complete(ble_client.connect())
         except Exception as e:
