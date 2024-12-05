@@ -531,7 +531,6 @@ class Decoder():
         return advert
 
     def decode_advertisement(self, advertisement_data: bytes) -> dict:
-        # data = advertisement_data.hex()
         return self.decode_ad5(advertisement_data)
 
     def decode_heartbeat_rx(self, bytearr: Bytes = None) -> int:

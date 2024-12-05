@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger()
 
 class MQTTClient():
-    def __init__(self, callback: callable, name: str, asnc: bool = True) -> None:
+    def __init__(self, callback: callable, name: str, asnc: bool = True, nostart = False) -> None:
         self.client = mqtt.Client(
             mqtt.CallbackAPIVersion.VERSION1,
             client_id = os.environ.get("MQTT_CLIENT_ID", "default_client") + "_" + name + str(uuid.uuid4()),
@@ -31,8 +31,10 @@ class MQTTClient():
         )
         if asnc:
             self.client.loop_start()
-        else:
+        elif not nostart:
             self.client.loop_forever()
+        else:
+            logger.info("no startup")
 
     def send_message(self, topic: str, msg: any):
         self.client.publish(self.root_topic_raw + "/" + topic, msg)

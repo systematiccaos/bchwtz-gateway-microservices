@@ -1,0 +1,4 @@
+<p>start works!</p>
+<button (click)="getState()">get state</button>
+<button (click)="getTags()">get tags</button>
+<li *ngFor="let tag of state | mapToArray ">{{tag.key}}</li>

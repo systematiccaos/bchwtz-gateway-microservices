@@ -1,14 +1,22 @@
-from flask import Flask, jsonify, request
+import eventlet
+eventlet.monkey_patch()
+from flask import Flask, jsonify
+from flask_cors import CORS
 from gateway.mqtt import MQTTClient
 from gateway.config import Config
 from mergedeep import merge
 from transcoder.utils.encoding import Encoder
 import time
-import json
 import os
+from flask_socketio import SocketIO
+
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+
 state = {}
+
 def build_dict_from_pth(path: list, val: any) -> dict:
     if len(path) > 1:
         return {path[0]: build_dict_from_pth(path[1:], val)}
@@ -18,16 +26,22 @@ def build_dict_from_pth(path: list, val: any) -> dict:
 def mqtt_cb(topic:str, msg: bytes):
     merge(state, build_dict_from_pth(topic.split("/"), msg.decode('utf-8')))
     print(state)
+    socketio.emit("state", state)
 
-mqtt_client = MQTTClient(mqtt_cb, "api")
+mqtt_client = MQTTClient(mqtt_cb, "api", asnc=False, nostart=True)
+socketio.start_background_task(mqtt_client.client.loop_forever)
 
 @app.route('/', methods=['GET'])
 def home():
     return "Welcome to the Basic Flask API!"
 
-@app.route('/state', methods=['GET'])
-def get_items():
+@app.route('/get-state', methods=['GET'])
+def get_state():
     return jsonify(state)
+
+@app.route('/get-tags', methods=['GET'])
+def get_tags():
+    return jsonify([tag for tag, val in state.items()])
 
 @app.route('/tag/<address>/get-config', methods=['GET'])
 def get_config(address):
@@ -55,6 +69,13 @@ def get_heartbeat(address, heartbeat):
 #     new_item['id'] = len(items) + 1
 #     items.append(new_item)
 #     return jsonify(new_item), 201
+@socketio.on('connect')
+def connect():
+    print("client connected")
+    socketio.emit("successfully connected")
 
-if __name__ == '__main__':
-    app.run(port=os.environ['API_PORT'], debug=True)
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+if __name__ == '__main__': 
+    socketio.run(app, host="0.0.0.0", port=int(os.environ["API_PORT"]))
