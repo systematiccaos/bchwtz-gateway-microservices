@@ -9,6 +9,7 @@ from gateway.json_helper import bytes_to_strings
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("bluetooth")
+logger.setLevel(logging.INFO)
 main_loop = asyncio.new_event_loop()
 ble_loop = asyncio.new_event_loop()
 bg_loop = asyncio.new_event_loop()
@@ -24,13 +25,13 @@ class BluetoothCMDDaemon(object):
     def on_ble_response(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
-        self.mqtt_client.send_message(f"{self.address}/response/{self.uuid}", msg = str(res))
+        self.mqtt_client.send_message(f"{self.address}/response/{self.uuid}", msg = res)
 
     def on_stream_data(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
         res = res[1:]
-        self.mqtt_client.send_message(f"{self.address}/stream", msg = str(res))
+        self.mqtt_client.send_message(f"{self.address}/stream", msg = res)
 
 
     def on_mqtt_message(self, topic: str, payload: any):
@@ -53,7 +54,7 @@ class BluetoothCMDDaemon(object):
         try:
             if fn == "run_single_ble_command":
                 logger.info("running command")
-                print(payload)
+                logger.info(payload)
                 ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_ble_response, await_response=True))
             elif fn == "start_stream":
                 ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_stream_data, await_response=False))

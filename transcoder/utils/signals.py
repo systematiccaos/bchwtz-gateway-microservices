@@ -4,7 +4,7 @@ import logging
 
 
 class SigScanner():
-    logger = logging.getLogger("Tag")
+    logger = logging.getLogger("SigScanner")
     logger.setLevel(logging.ERROR)
 
     def scan_signals(bytes: bytearray = None, checks: Enum = None) -> list[str]:

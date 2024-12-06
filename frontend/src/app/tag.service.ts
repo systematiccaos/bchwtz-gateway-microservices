@@ -9,6 +9,7 @@ import { io, Socket } from 'socket.io-client';
 export class TagService {
   private readonly apibase = "http://localhost:8000";
   private readonly socket: Socket
+  public state: Object = {};
   constructor(private readonly httpClient: HttpClient) {
     this.socket = io("http://localhost:8000");
   }
@@ -17,6 +18,7 @@ export class TagService {
   onMessage(): Observable<any> {
     return new Observable<any>((observer) => {
       this.socket.on('state', (message: any) => {
+        this.state = message;
         observer.next(message);
       });
 
@@ -48,10 +50,10 @@ export class TagService {
   }
 
   public getConfig(addr: string): Observable<any> {
-    return this.httpClient.get(`${this.apibase}/${addr}/get-config`);
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/get-config`);
   }
 
   public getTime(addr: string): Observable<any> {
-    return this.httpClient.get(`${this.apibase}/${addr}/get-time`);
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/get-time`);
   }
 }

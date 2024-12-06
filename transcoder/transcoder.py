@@ -5,10 +5,14 @@ import os
 import logging
 from gateway.json_helper import bytes_to_strings
 from utils.decoding import Decoder
+from utils.signals import SigScanner
 import json
+from gateway.config import Config
+import binascii
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("transcoder")
+logger.setLevel(logging.INFO)
 main_loop = asyncio.new_event_loop()
 ble_loop = asyncio.new_event_loop()
 bg_loop = asyncio.new_event_loop()
@@ -24,7 +28,31 @@ class Transcoder(object):
         address = topic_attrs[0]
         self.address = address
         key = ""
-        if len(topic_attrs) <= 1 or topic_attrs[1] != "advertisements":
+        payloadstr = payload.decode('utf-8')
+        if payloadstr == 'error':
+            logger.info('error')
+            return
+        if len(topic_attrs) > 1 and topic_attrs[1] == "response":
+            logger.info(payloadstr)
+            logger.info("decoding sig")
+            sig = SigScanner.scan_signals(bytearray.fromhex(payloadstr), Config.ReturnSignals)
+            logger.info(sig)
+            if sig is None:
+                return
+            if "config" in sig:
+                decoded_data = decoder.decode_config_rx(bytearray.fromhex(payloadstr))
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/config", json.dumps(decoded_data.get_props()))
+                return
+            if "time" in sig:
+                decoded_data = decoder.decode_time_rx(bytearray.fromhex(payloadstr))
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/time", decoded_data)
+                return
+            if "heartbeat" in sig:
+                decoded_data = decoder.decode_heartbeat_rx(bytearray.fromhex(payloadstr))
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/heartbeat", decoded_data)
+                return
+            return
+        elif len(topic_attrs) <= 1 or topic_attrs[1] != "advertisements":
             print(topic_attrs)
             return
         if len(topic_attrs) > 2:
@@ -40,11 +68,9 @@ class Transcoder(object):
             if key == "manufacturer_data":
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
-                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded_advertisements", json.dumps(decoded_data))
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/advertisements", json.dumps(decoded_data))
                 logger.info("decoding")
                 
-            elif key == "encode":
-                logger.info("encoding")
             else:
                 logger.info(f"nothing to decode on {key}")
             # ble_loop.run_until_complete()

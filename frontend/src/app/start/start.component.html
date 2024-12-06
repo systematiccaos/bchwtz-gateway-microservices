@@ -1,4 +1,5 @@
-<p>start works!</p>
-<button (click)="getState()">get state</button>
-<button (click)="getTags()">get tags</button>
-<li *ngFor="let tag of state | mapToArray ">{{tag.key}}</li>
+<button mat-flat-button (click)="getState()">get state</button>
+<button mat-flat-button (click)="getTags()">get tags</button>
+<ul>
+  <li *ngFor="let tag of state | mapToArray "><a mat-flat-button href="/tag/{{ tag.key }}">{{tag.key}}</a></li>
+</ul>

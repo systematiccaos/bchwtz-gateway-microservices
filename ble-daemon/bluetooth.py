@@ -49,7 +49,7 @@ class BLEConn():
             b: Callback that will be executed when a notification is received
         """
         self.logger.info("connecting to %s", self.address)
-        device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=5.0)
+        device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=10.0)
         cmd = cmd.decode('ascii')
         # self.logger.info(device.details)
         async with self.connect(device) as client:
@@ -68,6 +68,7 @@ class BLEConn():
                 else:
                     self.logger.info("waiting for data...")
                     await self.stopEvent.wait()
+                await asyncio.sleep(5)
                 self.logger.info("ending...")
                 self.stopEvent.clear()
 

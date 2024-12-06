@@ -3,10 +3,11 @@ import { TagService } from '../tag.service';
 import { Subscription } from 'rxjs';
 import { NgFor } from '@angular/common';
 import { MapToArrayPipe } from '../maptoarray.pipe';
+import { MatButtonModule } from '@angular/material/button'
 
 @Component({
   selector: 'app-start',
-  imports: [NgFor, MapToArrayPipe],
+  imports: [NgFor, MapToArrayPipe, MatButtonModule],
   templateUrl: './start.component.html',
   styleUrl: './start.component.scss'
 })
@@ -29,6 +30,8 @@ export class StartComponent implements OnInit {
     this.errorSubscription = this.tagService.onConnectError().subscribe(
       (err: any) => console.error('Connection error:', err)
     );
+
+    this.state = this.getState();
   }
 
   ngOnDestroy() {
@@ -38,6 +41,7 @@ export class StartComponent implements OnInit {
 
   public getState() {
     this.tagService.getState().subscribe(response => {
+      this.state = response;
       console.log(response);
     });
   }
