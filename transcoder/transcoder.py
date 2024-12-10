@@ -1,14 +1,11 @@
 from gateway.mqtt import MQTTClient
 import asyncio
 from dotenv import load_dotenv
-import os
 import logging
-from gateway.json_helper import bytes_to_strings
 from utils.decoding import Decoder
 from utils.signals import SigScanner
 import json
 from gateway.config import Config
-import binascii
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("transcoder")
@@ -32,7 +29,7 @@ class Transcoder(object):
         if payloadstr == 'error':
             logger.info('error')
             return
-        if len(topic_attrs) > 1 and topic_attrs[1] == "response":
+        if len(topic_attrs) > 1 and topic_attrs[1] == "response" and payloadstr != "":
             logger.info(payloadstr)
             logger.info("decoding sig")
             sig = SigScanner.scan_signals(bytearray.fromhex(payloadstr), Config.ReturnSignals)

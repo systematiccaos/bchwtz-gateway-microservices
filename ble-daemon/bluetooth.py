@@ -50,7 +50,10 @@ class BLEConn():
         """
         self.logger.info("connecting to %s", self.address)
         device: BLEDevice = await BleakScanner.find_device_by_address(self.address, timeout=10.0)
-        cmd = cmd.decode('ascii')
+        if device is None:
+            self.logger.error("Timeout - no device found")
+            return
+        cmd = cmd.decode('utf-8')
         # self.logger.info(device.details)
         async with self.connect(device) as client:
             # if not device.details["props"]["Paired"]:

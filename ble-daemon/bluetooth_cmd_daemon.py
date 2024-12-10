@@ -3,9 +3,11 @@ from bluetooth import BLEConn
 import asyncio
 from dotenv import load_dotenv
 import os
-import uuid
+import socket
 import logging
 from gateway.json_helper import bytes_to_strings
+import hashlib
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("bluetooth")
@@ -13,19 +15,20 @@ logger.setLevel(logging.INFO)
 main_loop = asyncio.new_event_loop()
 ble_loop = asyncio.new_event_loop()
 bg_loop = asyncio.new_event_loop()
+
 class BluetoothCMDDaemon(object):
 
     def __init__(self):
         self.mqtt_client = MQTTClient(self.on_mqtt_message, name="cmd_daemon")
         self.address = ""
-        self.mqtt_client.send_message(f"log", msg = "online")
-        self.uuid = str(uuid.uuid4())
-
+        self.hostname = socket.gethostname()
+        self.ipaddr = hashlib.sha256(socket.gethostbyname(self.hostname).encode('utf-8')).hexdigest()
+        self.mqtt_client.send_message(f"log", msg = "%s command daemon online" % self.ipaddr)
 
     def on_ble_response(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
-        self.mqtt_client.send_message(f"{self.address}/response/{self.uuid}", msg = res)
+        self.mqtt_client.send_message(f"{self.address}/response/{self.ipaddr}", msg = res)
 
     def on_stream_data(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
@@ -34,7 +37,7 @@ class BluetoothCMDDaemon(object):
         self.mqtt_client.send_message(f"{self.address}/stream", msg = res)
 
 
-    def on_mqtt_message(self, topic: str, payload: any):
+    def on_mqtt_message(self, topic: str, payload: bytes):
         topic_attrs = topic.split("/")
         address = topic_attrs[0]
         self.address = address
@@ -67,7 +70,7 @@ class BluetoothCMDDaemon(object):
         except Exception as e:
             logger.error(f"recovered from ble error - check your command")
             logger.exception(e)
-            self.mqtt_client.send_message("%s/response/error/%s" % (address, self.uuid), "error")
+            self.mqtt_client.send_message("%s/response/error/%s" % (address, self.ipaddr), "error")
             return
 
 load_dotenv()

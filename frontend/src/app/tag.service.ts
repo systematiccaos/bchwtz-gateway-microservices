@@ -56,4 +56,10 @@ export class TagService {
   public getTime(addr: string): Observable<any> {
     return this.httpClient.get(`${this.apibase}/tag/${addr}/get-time`);
   }
+  public setTime(addr: string): Observable<any> {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/set-current-time`);
+  }
+  public getHeartbeat(addr: string): Observable<any> {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/get-heartbeat`);
+  }
 }

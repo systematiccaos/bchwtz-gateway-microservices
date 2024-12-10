@@ -1,3 +1,4 @@
+import logging
 import eventlet
 eventlet.monkey_patch()
 from flask import Flask, jsonify
@@ -6,15 +7,16 @@ from gateway.mqtt import MQTTClient
 from gateway.config import Config
 from mergedeep import merge
 from transcoder.utils.encoding import Encoder
-import time
+from datetime import datetime
 import os
 from flask_socketio import SocketIO
-
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
-
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
+logger = logging.getLogger("api")
+logger.setLevel(logging.INFO)
 state = {}
 
 def build_dict_from_pth(path: list, val: any) -> dict:
@@ -25,7 +27,7 @@ def build_dict_from_pth(path: list, val: any) -> dict:
 
 def mqtt_cb(topic:str, msg: bytes):
     merge(state, build_dict_from_pth(topic.split("/"), msg.decode('utf-8')))
-    print(state)
+    logger.info(state)
     socketio.emit("state", state)
 
 mqtt_client = MQTTClient(mqtt_cb, "api", asnc=False, nostart=True)
@@ -55,13 +57,37 @@ def get_time(address):
 
 @app.route('/tag/<address>/set-current-time', methods=['GET'])
 def set_time(address):
-    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_time(time.time()))
+    raw_time = int(datetime.now().timestamp()) * 1000
+    logger.info(f"raw time: {raw_time}")
+    encoded_time = Encoder().encode_time(raw_time)
+    logger.info(f"encoded time: {encoded_time}")
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, encoded_time)
     return jsonify({'message': 'pushing current timestamp'})
 
-@app.route('/tag/<address>/get-heartbeat/<int:heartbeat>', methods=['GET'])
-def get_heartbeat(address, heartbeat):
-    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_heartbeat(heartbeat))
+@app.route('/tag/<address>/get-heartbeat', methods=['GET'])
+def get_heartbeat(address):
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.get_heartbeat_config.value)
     return jsonify({'message': 'pulling heartbeat config'})
+
+@app.route('/tag/<address>/set-heartbeat/<int:heartbeat>', methods=['GET'])
+def set_heartbeat(address, heartbeat):
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_heartbeat(heartbeat))
+    return jsonify({'message': 'pushing heartbeat config'})
+
+@app.route('/tag/<address>/get-acc-log', methods=['GET'])
+def get_acceleration_log(address):
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.get_acceleration_data.value)
+    return jsonify({'message': 'pulling acceleration log'})
+
+@app.route('/tag/<address>/start-logging', methods=['GET'])
+def start_acceleration_log(address):
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.activate_logging_at_tag.value)
+    return jsonify({'message': 'pulling acceleration log'})
+
+@app.route('/tag/<address>/start-streaming', methods=['GET'])
+def start_acceleration_log(address):
+    mqtt_client.send_message("%s/command/start_streaming" % address)
+    return jsonify({'message': 'pulling acceleration log'})
 
 # @app.route('/item', methods=['POST'])
 # def create_item():

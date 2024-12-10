@@ -46,4 +46,13 @@ export class TagComponent {
   public getConfig() {
     this.tagService.getConfig(this.params.address).subscribe(result => console.log(result));
   }
+  public getTime() {
+    this.tagService.getTime(this.params.address).subscribe(result => console.log(result));
+  }
+  public getHeartbeat() {
+    this.tagService.getHeartbeat(this.params.address).subscribe(result => console.log(result));
+  }
+  public setTime() {
+    this.tagService.setTime(this.params.address).subscribe(result => console.log(result));
+  }
 }

@@ -510,6 +510,7 @@ class Decoder():
         return config
 
     def decode_time_rx(self, bytearr: Bytes =  None) -> float:
+        logger.info("Received time raw: %s" % bytearr)
         logger.info("Received time: %s" % hexlify(bytearr[:-9:-1]))
         received_time = time.mktime(time.localtime(int(hexlify(bytearr[:-9:-1]), 16) / 1000))
         return received_time

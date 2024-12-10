@@ -2,9 +2,9 @@ from logging import Logger
 import logging
 from random import sample
 import struct
-from time import time
 from gateway.config import Config
 from gateway.tag.tagconfig import TagConfig
+from binascii import hexlify
 
 
 class Encoder():
@@ -33,9 +33,10 @@ class Encoder():
         self.logger.debug("Set sensor config {}".format(command))
         return command
 
-    def encode_time(self, time: float = None) -> str:
-        now = struct.pack("<Q", int(time * 1000)).hex()
-        print(now)
+    def encode_time(self, t: float = None) -> str:
+        now = struct.pack("<Q", int(t))
+        self.logger.info(now)
+        now = now.hex()
         command = Config.Commands.set_tag_time_substr.value + now
         self.logger.debug("Set sensor time {}".format(command))
         return command
