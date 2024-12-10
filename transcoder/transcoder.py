@@ -66,6 +66,7 @@ class Transcoder(object):
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
                 self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/advertisements", json.dumps(decoded_data))
+                self.log_advertisements(topic_attrs[0], decoded_data=decoded_data)
                 logger.info("decoding")
                 
             else:
@@ -76,6 +77,9 @@ class Transcoder(object):
             logger.error(f"recovered from decoding error - check your command")
             logger.exception(e)
             return
+    def log_advertisements(self, chan, decoded_data):
+        for key, val in decoded_data.items():
+            self.mqtt_client.send_message(f"{chan}/decoded/advertisements/{key}", val)
 
 load_dotenv()
 daemon = Transcoder()

@@ -85,8 +85,13 @@ def start_acceleration_log(address):
     return jsonify({'message': 'pulling acceleration log'})
 
 @app.route('/tag/<address>/start-streaming', methods=['GET'])
-def start_acceleration_log(address):
+def start_streaming(address):
     mqtt_client.send_message("%s/command/start_streaming" % address)
+    return jsonify({'message': 'pulling acceleration log'})
+
+@app.route('/tag/<address>/stop-streaming', methods=['GET'])
+def stop_streaming(address):
+    mqtt_client.send_message("%s/command/stop_streaming" % address)
     return jsonify({'message': 'pulling acceleration log'})
 
 # @app.route('/item', methods=['POST'])
