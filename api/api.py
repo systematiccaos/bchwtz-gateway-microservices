@@ -5,6 +5,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from gateway.mqtt import MQTTClient
 from gateway.config import Config
+from gateway.tag.tagconfig import TagConfig
 from mergedeep import merge
 from transcoder.utils.encoding import Encoder
 from datetime import datetime
@@ -50,6 +51,33 @@ def get_config(address):
     mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.get_tag_config.value)
     return jsonify({'message': 'pulling config'})
 
+@app.route('/tag/<address>/set-samplerate/<int:samplerate>', methods=['GET'])
+def set_samplerate(address, samplerate):
+    conf = TagConfig()
+    conf.samplerate = samplerate
+    if conf.samplerate not in Config.AllowedValues.samplerate.value:
+        return jsonify({'error': f"{conf.samplerate} is not a valid value"})
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_config(conf))
+    return jsonify({'message': 'pushing samplerate'})
+
+@app.route('/tag/<address>/set-resolution/<int:resolution>', methods=['GET'])
+def set_resolution(address, resolution):
+    conf = TagConfig()
+    conf.resolution = resolution
+    if conf.resolution not in Config.AllowedValues.sample_resolution.value:
+        return jsonify({'error': f"{conf.resolution} is not a valid value"})
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_config(conf))
+    return jsonify({'message': 'pushing samplerate'})
+
+@app.route('/tag/<address>/set-scale/<int:scale>', methods=['GET'])
+def set_scale(address, scale):
+    conf = TagConfig()
+    conf.scale = scale
+    if conf.scale not in Config.AllowedValues.scale.value:
+        return jsonify({'error': f"{conf.scale} is not a valid value"})
+    mqtt_client.send_message("%s/command/run_single_ble_command" % address, Encoder().encode_config(conf))
+    return jsonify({'message': 'pushing samplerate'})
+
 @app.route('/tag/<address>/get-time', methods=['GET'])
 def get_time(address):
     mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.get_tag_timestamp.value)
@@ -82,24 +110,18 @@ def get_acceleration_log(address):
 @app.route('/tag/<address>/start-logging', methods=['GET'])
 def start_acceleration_log(address):
     mqtt_client.send_message("%s/command/run_single_ble_command" % address, Config.Commands.activate_logging_at_tag.value)
-    return jsonify({'message': 'pulling acceleration log'})
+    return jsonify({'message': 'starting acceleration log'})
 
 @app.route('/tag/<address>/start-streaming', methods=['GET'])
 def start_streaming(address):
-    mqtt_client.send_message("%s/command/start_streaming" % address)
-    return jsonify({'message': 'pulling acceleration log'})
+    mqtt_client.send_message("%s/command/start_stream" % address, Config.Commands.activate_acc_streaming.value)
+    return jsonify({'message': 'starting stream'})
 
 @app.route('/tag/<address>/stop-streaming', methods=['GET'])
 def stop_streaming(address):
-    mqtt_client.send_message("%s/command/stop_streaming" % address)
-    return jsonify({'message': 'pulling acceleration log'})
+    mqtt_client.send_message("%s/command/stop_stream" % address, Config.Commands.activate_acc_streaming.value)
+    return jsonify({'message': 'stopping stream'})
 
-# @app.route('/item', methods=['POST'])
-# def create_item():
-#     new_item = request.get_json()
-#     new_item['id'] = len(items) + 1
-#     items.append(new_item)
-#     return jsonify(new_item), 201
 @socketio.on('connect')
 def connect():
     print("client connected")

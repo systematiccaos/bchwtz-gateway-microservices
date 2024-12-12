@@ -62,4 +62,17 @@ export class TagService {
   public getHeartbeat(addr: string): Observable<any> {
     return this.httpClient.get(`${this.apibase}/tag/${addr}/get-heartbeat`);
   }
+  public setHeartbeat(addr: string, heartbeat: number) {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/set-heartbeat/${heartbeat}`);
+  }
+  public setSamplerate(addr: string, samplerate: number) {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/set-samplerate/${samplerate}`);
+  }
+  public startStreaming(addr: string) {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/start-streaming`);
+  }
+  public stopStreaming(addr: string) {
+    return this.httpClient.get(`${this.apibase}/tag/${addr}/stop-streaming`);
+  }
+
 }

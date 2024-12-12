@@ -1,4 +1,27 @@
+<h1>General tag functions for tag {{ params.address }}</h1>
+<h2>Get and set config attributes</h2>
 <button mat-flat-button (click)="getConfig()">get config</button><br>
-<button mat-flat-button (click)="getTime()">get time</button><br>
+<hr>
 <button mat-flat-button (click)="getHeartbeat()">get heartbeat</button><br>
+<hr>
+<button mat-flat-button (click)="setSamplerate(50)">set samplerate 50</button>
+<button mat-flat-button (click)="setSamplerate(100)">set samplerate 100</button>
+<button mat-flat-button (click)="setSamplerate(200)">set samplerate 200</button>
+<button mat-flat-button (click)="setSamplerate(400)">set samplerate 400</button><br>
+<hr>
+<button mat-flat-button (click)="setHeartbeat(100)">set heartbeat 100</button>
+<button mat-flat-button (click)="setHeartbeat(200)">set heartbeat 200</button>
+<button mat-flat-button (click)="setHeartbeat(500)">set heartbeat 500</button>
+<button mat-flat-button (click)="setHeartbeat(1000)">set heartbeat 1000</button><br>
+<hr>
+<h2>Time related functions - set current time sets the time of your system to the tag</h2>
+<button mat-flat-button (click)="getTime()">get time</button><br>
+<hr>
 <button mat-flat-button (click)="setTime()">set current time</button><br>
+<h2>Start and stop streaming acceleration data</h2>
+<button mat-flat-button (click)="startStreaming()">start acceleration streaming</button>
+<hr>
+<button mat-flat-button (click)="stopStreaming()">stop acceleration streaming</button><br>
+<h2>Current state of tag {{ params.address }}</h2>
+<hr>
+<pre>{{ stateJSON }}</pre>

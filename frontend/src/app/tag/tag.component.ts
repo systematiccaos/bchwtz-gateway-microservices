@@ -17,14 +17,15 @@ export class TagComponent {
 
   private messageSubscription!: Subscription;
   private errorSubscription!: Subscription;
-  private state: any;
-  private params: any;
+  private readonly state: Array<any>= [];
+  public stateJSON: any = "";
+  public params: any;
 
   ngOnInit() {
     this.messageSubscription = this.tagService.onMessage().subscribe({
       next: (message: any) => {
         console.log(message);
-        this.state = message;
+        this.setState(message);
       },
       error: (err: any) => console.error('Error:', err)
     });
@@ -33,14 +34,19 @@ export class TagComponent {
       (err: any) => console.error('Connection error:', err)
     );
 
-    this.state = this.getState();
+    this.getState();
   }
 
   public getState() {
     this.tagService.getState().subscribe(response => {
-      this.state = response;
+      this.setState(response);
       console.log(response);
     });
+  }
+
+  private setState(state: any) {
+    this.state.push(state[this.params.address]);
+    this.stateJSON = JSON.stringify(state[this.params.address], null, "    ")
   }
 
   public getConfig() {
@@ -54,5 +60,17 @@ export class TagComponent {
   }
   public setTime() {
     this.tagService.setTime(this.params.address).subscribe(result => console.log(result));
+  }
+  public setSamplerate(rate: number) {
+    this.tagService.setSamplerate(this.params.address, rate).subscribe(result => console.log(result));
+  }
+  public setHeartbeat(heartbeat: number) {
+    this.tagService.setSamplerate(this.params.address, heartbeat).subscribe(result => console.log(result));
+  }
+  public startStreaming() {
+    this.tagService.startStreaming(this.params.address).subscribe(result => console.log(result));
+  }
+  public stopStreaming() {
+    this.tagService.stopStreaming(this.params.address).subscribe(result => console.log(result));
   }
 }

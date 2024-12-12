@@ -6,7 +6,7 @@ html, body {
     color: mat.$cyan-palette,
     typography: Roboto,
     density: 0,
-    theme-type: dark
+    theme-type: bright
   ));
 }
 body {
@@ -14,5 +14,5 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
-  color-scheme: dark;
+  color-scheme: bright;
 }

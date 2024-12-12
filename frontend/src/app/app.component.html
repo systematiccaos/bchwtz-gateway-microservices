@@ -1,1 +1,14 @@
-<router-outlet></router-outlet>
+<mat-toolbar>
+  <mat-toolbar-row><h1>Menu</h1></mat-toolbar-row>
+  <mat-toolbar-row>
+    <a mat-button color="primary" routerLink="/">All Tags</a>
+    <button mat-button [matMenuTriggerFor]="menu">Docs</button>
+    <mat-menu color="primary" #menu="matMenu">
+      <button mat-menu-item routerLink="/docs/infrastructure">Infrastructure</button>
+      <button mat-menu-item routerLink="/docs/roaming_states">Roaming</button>
+      <button mat-menu-item routerLink="/docs/use_cases_and_testing">Use cases</button>
+    </mat-menu>  </mat-toolbar-row>
+</mat-toolbar>
+<article>
+  <router-outlet></router-outlet>
+</article>

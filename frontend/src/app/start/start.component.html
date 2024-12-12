@@ -1,5 +1,12 @@
+<h1>Tag overview</h1>
+<p>This overview shows all the tags. You can select one tag to control and inspect it.</p>
+<p>The api holds a momentary state of the cluster. You can retrieve it using "get state", but it will also be updated automatically via websocket.</p>
 <button mat-flat-button (click)="getState()">get state</button>
+<p>"Get tags" resolves a list of all detected tags.</p>
 <button mat-flat-button (click)="getTags()">get tags</button>
+<p>This list will automatically expand, as soon as the cluster detects a new tag using the ble-discovery-daemon.</p>
 <ul>
-  <li *ngFor="let tag of state | mapToArray "><a mat-flat-button href="/tag/{{ tag.key }}">{{tag.key}}</a></li>
+  <li *ngFor="let tag of state | mapToArray "><a mat-flat-button routerLink="/tag/{{ tag.key }}">{{tag.key}}</a></li>
 </ul>
+<p>Current cluster state:</p>
+<pre>{{ stateJSON }}</pre>

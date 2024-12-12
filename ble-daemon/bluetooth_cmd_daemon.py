@@ -7,6 +7,7 @@ import socket
 import logging
 from gateway.json_helper import bytes_to_strings
 import hashlib
+import threading
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
@@ -24,6 +25,7 @@ class BluetoothCMDDaemon(object):
         self.hostname = socket.gethostname()
         self.ipaddr = hashlib.sha256(socket.gethostbyname(self.hostname).encode('utf-8')).hexdigest()
         self.mqtt_client.send_message(f"log", msg = "%s command daemon online" % self.ipaddr)
+        self.ble_clients = {}
 
     def on_ble_response(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
@@ -33,9 +35,8 @@ class BluetoothCMDDaemon(object):
     def on_stream_data(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
-        res = res[1:]
-        self.mqtt_client.send_message(f"{self.address}/stream", msg = res)
-
+        # res = res[1:]
+        self.mqtt_client.send_message(f"{self.address}/stream/{self.ipaddr}", msg = res)
 
     def on_mqtt_message(self, topic: str, payload: bytes):
         topic_attrs = topic.split("/")
@@ -52,17 +53,22 @@ class BluetoothCMDDaemon(object):
         if payload is None or len(payload) < 1:
             logger.error("recovered from error - no command provided on mqtt")
             return
-        ble_client = BLEConn(address=address)
+        if address not in self.ble_clients.keys():
+            ble_client = BLEConn(address=address)
+            self.ble_clients[address] = ble_client
+            logger.info(self.ble_clients)
+        else:
+            ble_client = self.ble_clients[address]
         logger.debug(payload)
         try:
             if fn == "run_single_ble_command":
                 logger.info("running command")
                 logger.info(payload)
-                ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_ble_response, await_response=True))
+                asyncio.run_coroutine_threadsafe(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_ble_response, await_response=True), ble_loop)
             elif fn == "start_stream":
-                ble_loop.run_until_complete(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_stream_data, await_response=False))
+                asyncio.run_coroutine_threadsafe(ble_client.run_single_ble_command(read_chan=os.environ.get("BLE_READ_CH"), write_chan=os.environ.get("BLE_WRITE_CH"), cmd = payload, cb=self.on_stream_data, await_response=False), ble_loop)
             elif fn == "stop_stream":
-                bg_loop.run_until_complete(ble_client.stopEvent.set())
+                ble_client.stopEvent.set()
             else:
                 logger.debug(f"function not available for {fn}")
             # ble_loop.run_until_complete()
@@ -75,4 +81,6 @@ class BluetoothCMDDaemon(object):
 
 load_dotenv()
 daemon = BluetoothCMDDaemon()
+t = threading.Thread(target=ble_loop.run_forever)
+t.start()
 main_loop.run_forever()
