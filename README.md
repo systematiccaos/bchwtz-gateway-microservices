@@ -10,6 +10,7 @@ pip install -r requirements
 cd deployments
 docker compose --env-file ../.env -f docker-compose.yml -f docker-compose.prod.yml up -d # This step will build your containers on the first start 
 ```
+Head over to localhost:8080 to view the frontend for further information. The API will be available under localhost:8000.
 ## Start the microservices - has to be done every time you start developing
 ### for posix-shells:
 ```bash
