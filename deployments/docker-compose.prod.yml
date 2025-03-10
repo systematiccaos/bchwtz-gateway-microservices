@@ -1,0 +1,57 @@
+services:
+  mqtt:
+    image: rabbitmq:alpine
+    security_opt:
+      - seccomp:unconfined
+    command: "/bin/bash -c \"rabbitmq-plugins enable rabbitmq_mqtt; rabbitmq-server\""
+    ports:
+      - "${MQTT_PORT}:1883"
+    networks:
+    - mqtt
+    restart: always
+    volumes:
+      - "rabbitmq:/etc/rabbitmq"
+    environment:
+      - "RABBITMQ_DEFAULT_USER=${MQTT_USER}"
+      - "RABBITMQ_DEFAULT_PASS=${MQTT_PASSWORD}"
+  api:
+    build: 
+      context: ../
+      dockerfile: api/Dockerfile
+    ports:
+    - 8000:8000
+    networks:
+    - mqtt
+    - web
+    environment:
+      - "MQTT_USER=${MQTT_USER}"
+      - "MQTT_PORT=${MQTT_PORT}"
+      - "MQTT_PASSWORD=${MQTT_PASSWORD}"
+      - "MQTT_HOST=${MQTT_HOST}"
+      - "MQTT_ROOT_TOPIC=${MQTT_ROOT_TOPIC}"
+      - "API_PORT=${API_PORT}"
+  frontend:
+    build: ../frontend
+    ports:
+    - 8080:80
+    networks:
+    - mqtt
+    - web
+  transcoder:
+    build:
+      dockerfile: transcoder/Dockerfile
+      context: ../
+    environment:
+      - "MQTT_USER=${MQTT_USER}"
+      - "MQTT_PORT=${MQTT_PORT}"
+      - "MQTT_PASSWORD=${MQTT_PASSWORD}"
+      - "MQTT_HOST=${MQTT_HOST}"
+      - "MQTT_ROOT_TOPIC=${MQTT_ROOT_TOPIC}"
+      - "API_PORT=${API_PORT}"
+    networks:
+    - mqtt
+volumes:
+  rabbitmq:
+networks:
+  mqtt:
+  web:

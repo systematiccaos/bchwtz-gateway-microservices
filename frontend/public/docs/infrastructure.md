@@ -8,7 +8,7 @@
   * deployments: docker-compose deployments
   * docs: symlink to frontend/public/docs
   * gateway: Library with general functions, like tag-objects, sensor-objects etc.
-  * platform: Web-API, including business logic
+  * api: Web-API, including business logic
   * transcoder: Transcodes all messages, encoding is used as a library in platform
 
 ## Key principles

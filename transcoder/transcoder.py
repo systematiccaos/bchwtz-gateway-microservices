@@ -40,7 +40,7 @@ class Transcoder(object):
                 return
             if "config" in sig:
                 decoded_data = decoder.decode_config_rx(bytearray.fromhex(payloadstr))
-                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/config", json.dumps(decoded_data.get_props()))
+                # self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/config", json.dumps(decoded_data.get_props()))
                 self.log_object_as_vals(f"{topic_attrs[0]}/decoded/config", decoded_data.get_props())
                 return
             if "time" in sig:
@@ -78,7 +78,7 @@ class Transcoder(object):
             if key == "manufacturer_data":
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
-                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/advertisements", json.dumps(decoded_data))
+                # self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/advertisements", json.dumps(decoded_data))
                 self.log_object_as_vals(f"{topic_attrs[0]}/decoded/advertisements", decoded_data=decoded_data)
                 logger.info("decoding")
                 

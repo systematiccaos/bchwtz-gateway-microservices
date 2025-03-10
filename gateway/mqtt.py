@@ -25,6 +25,7 @@ class MQTTClient():
             username = os.environ.get("MQTT_USER", "mqtt"),
             password = os.environ.get("MQTT_PASSWORD", "changeme"),
         )
+        logger.error(os.environ.get("MQTT_HOST"))
         self.client.connect(
             host = os.environ.get("MQTT_HOST", "localhost"),
             port = int(os.environ.get("MQTT_PORT", 1883)),
