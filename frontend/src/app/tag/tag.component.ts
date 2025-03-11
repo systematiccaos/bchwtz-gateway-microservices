@@ -65,7 +65,7 @@ export class TagComponent {
     this.tagService.setSamplerate(this.params.address, rate).subscribe(result => console.log(result));
   }
   public setHeartbeat(heartbeat: number) {
-    this.tagService.setSamplerate(this.params.address, heartbeat).subscribe(result => console.log(result));
+    this.tagService.setHeartbeat(this.params.address, heartbeat).subscribe(result => console.log(result));
   }
   public startStreaming() {
     this.tagService.startStreaming(this.params.address).subscribe(result => console.log(result));

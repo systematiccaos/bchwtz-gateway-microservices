@@ -44,15 +44,12 @@ export class TagService {
   public getState(): Observable<any> {
     return this.httpClient.get(`${this.apibase}/get-state`);
   }
-
   public getTags(): Observable<any> {
     return this.httpClient.get(`${this.apibase}/get-tags`);
   }
-
   public getConfig(addr: string): Observable<any> {
     return this.httpClient.get(`${this.apibase}/tag/${addr}/get-config`);
   }
-
   public getTime(addr: string): Observable<any> {
     return this.httpClient.get(`${this.apibase}/tag/${addr}/get-time`);
   }
