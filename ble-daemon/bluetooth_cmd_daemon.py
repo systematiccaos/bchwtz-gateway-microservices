@@ -23,20 +23,19 @@ class BluetoothCMDDaemon(object):
         self.mqtt_client = MQTTClient(self.on_mqtt_message, name="cmd_daemon")
         self.address = ""
         self.hostname = socket.gethostname()
-        self.ipaddr = hashlib.sha256(socket.gethostbyname(self.hostname).encode('utf-8')).hexdigest()
-        self.mqtt_client.send_message(f"log", msg = "%s command daemon online" % self.ipaddr)
+        self.mqtt_client.send_message(f"log", msg = "%s command daemon online" % self.hostname)
         self.ble_clients = {}
 
     def on_ble_response(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
-        self.mqtt_client.send_message(f"{self.address}/response/{self.ipaddr}", msg = res)
+        self.mqtt_client.send_message(f"{self.address}/response/{self.hostname}", msg = res)
 
     def on_stream_data(self, status: int, response: bytearray):
         res = bytes_to_strings(response)
         logger.info(res)
         # res = res[1:]
-        self.mqtt_client.send_message(f"{self.address}/stream/{self.ipaddr}", msg = res)
+        self.mqtt_client.send_message(f"{self.address}/stream/{self.hostname}", msg = res)
 
     def on_mqtt_message(self, topic: str, payload: bytes):
         topic_attrs = topic.split("/")

@@ -22,7 +22,6 @@ class BluetoothDiscoveryDaemon(object):
         self.mqtt_client = MQTTClient(self.on_mqtt_message, name="discovery_daemon")
         self.scanner = BLEScanner()
         self.hostname = socket.gethostname()
-        self.ipaddr = socket.gethostbyname(self.hostname).replace(".", "_")
     async def scan(self):
         await self.scanner.listen_advertisements(self.on_ble_message)
 
@@ -47,10 +46,10 @@ class BluetoothDiscoveryDaemon(object):
         manufacturer_id = int(os.environ.get("BLE_MANUFACTURER_ID", 0))
         if self.check_if_valid_device(dev, manufacturer_id=manufacturer_id):
             # return
-            self.mqtt_client.send_message(f"{dev.address}/advertisements/{self.ipaddr}", msg = json.dumps({"device": dev.address, "advertisement_data": str(properties), "metadata": bytes_to_strings(dev.metadata)}))
-            self.mqtt_client.send_message(f"{dev.address}/advertisements/name/{self.ipaddr}", msg = properties.local_name)
-            self.mqtt_client.send_message(f"{dev.address}/advertisements/rssi/{self.ipaddr}", msg = properties.rssi)
-            self.mqtt_client.send_message(f"{dev.address}/advertisements/manufacturer_data/{self.ipaddr}", msg = bytes_to_strings(properties.manufacturer_data[manufacturer_id]))
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/{self.hostname}", msg = json.dumps({"device": dev.address, "advertisement_data": str(properties), "metadata": bytes_to_strings(dev.metadata)}))
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/name/{self.hostname}", msg = properties.local_name)
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/rssi/{self.hostname}", msg = properties.rssi)
+            self.mqtt_client.send_message(f"{dev.address}/advertisements/manufacturer_data/{self.hostname}", msg = bytes_to_strings(properties.manufacturer_data[manufacturer_id]))
 
     def on_mqtt_message(self, topic: str, payload: any):
         pass
