@@ -36,7 +36,7 @@ socketio.start_background_task(mqtt_client.client.loop_forever)
 
 @app.route('/', methods=['GET'])
 def home():
-    return "Welcome to the Basic Flask API!"
+    return "IoT-API healthy"
 
 @app.route('/get-state', methods=['GET'])
 def get_state():

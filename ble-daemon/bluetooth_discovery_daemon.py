@@ -22,7 +22,7 @@ class BluetoothDiscoveryDaemon(object):
         self.mqtt_client = MQTTClient(self.on_mqtt_message, name="discovery_daemon")
         self.scanner = BLEScanner()
         self.hostname = socket.gethostname()
-        self.ipaddr = hashlib.sha256(socket.gethostbyname(self.hostname).encode('utf-8')).hexdigest()
+        self.ipaddr = socket.gethostbyname(self.hostname).replace(".", "_")
     async def scan(self):
         await self.scanner.listen_advertisements(self.on_ble_message)
 

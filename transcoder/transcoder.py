@@ -75,13 +75,19 @@ class Transcoder(object):
             return
         print(payload)
         try:
-            if key == "manufacturer_data":
+
+            if key == "manufacturer_data" and payload is not None:
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
                 # self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/advertisements", json.dumps(decoded_data))
                 self.log_object_as_vals(f"{topic_attrs[0]}/decoded/advertisements", decoded_data=decoded_data)
                 logger.info("decoding")
-                
+            if key == "rssi":
+                print(f"setting rssi to {payload}")
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/gateway/rssi/{topic_attrs[3]}", payload)
+            if key == "name":
+                print(f"setting name to {payload}")
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/name", payload)
             else:
                 logger.info(f"nothing to decode on {key}")
             # ble_loop.run_until_complete()
