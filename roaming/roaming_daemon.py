@@ -2,7 +2,7 @@ from gateway.mqtt import MQTTClient
 import asyncio
 from dotenv import load_dotenv
 import logging
-
+import time
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - {%(pathname)s:%(lineno)d}')
 logger = logging.getLogger("roaming")
@@ -17,6 +17,7 @@ class RoamingDaemon(object):
         self.address = ""
         self.strongest_gw = ""
         self.strongest_rssi = 0
+        self.last_update = time.time()
 
     def on_mqtt_message(self, topic: str, payload: any):
         topic_attrs = topic.split("/")
@@ -46,9 +47,24 @@ class RoamingDaemon(object):
             if key == "rssi":
                 print(f"setting rssi to {payload}")
                 gw = topic_attrs[3]
-                if self.strongest_gw == "" or self.strongest_rssi - payload > 20:
-                    self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/state/gateway_selection/active/address", gw)
-                    self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/state/gateway_selection/active/rssi", payload)
+                time_since_last_update = time.time() - self.last_update
+                rssi_diff = int(payload) - self.strongest_rssi
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/roaming/gateway_selection/debug/rssi_difference", rssi_diff)
+                self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/roaming/gateway_selection/debug/last_update", time_since_last_update)
+                update_reason = ""
+                if self.strongest_gw == "" or rssi_diff > 10 or time_since_last_update >= 60:
+                    if self.strongest_gw == "":
+                        update_reason = "initially discovered"
+                    if rssi_diff > 10:
+                        update_reason = "rssi_diff"
+                    if time_since_last_update >= 60:
+                        update_reason = "timeout"
+                    self.strongest_gw = gw
+                    self.strongest_rssi = int(payload)
+                    self.last_update = time.time()
+                    self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/roaming/gateway_selection/debug/update_reason", update_reason)
+                    self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/roaming/gateway_selection/active/address", gw)
+                    self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/roaming/gateway_selection/active/rssi", payload)
             else:
                 logger.info(f"nothing to decode on {key}")
             # ble_loop.run_until_complete()

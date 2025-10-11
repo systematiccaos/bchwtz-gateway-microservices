@@ -75,7 +75,6 @@ class Transcoder(object):
             return
         print(payload)
         try:
-
             if key == "manufacturer_data" and payload is not None:
                 decoded_data = decoder.decode_advertisement(payload)
                 logger.info(decoded_data)
