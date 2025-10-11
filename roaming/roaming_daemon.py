@@ -46,7 +46,7 @@ class RoamingDaemon(object):
             if key == "rssi":
                 print(f"setting rssi to {payload}")
                 gw = topic_attrs[3]
-                if self.strongest_gw == "" or self.strongest_rssi < payload:
+                if self.strongest_gw == "" or self.strongest_rssi - payload > 20:
                     self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/state/gateway_selection/active/address", gw)
                     self.mqtt_client.send_message(f"{topic_attrs[0]}/decoded/state/gateway_selection/active/rssi", payload)
             else:
